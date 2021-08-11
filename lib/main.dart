@@ -30,6 +30,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String _formattedPostcode = '';
   final _postcodeController = TextEditingController();
+  // set up regex for matching postcodes
+  // taken from https://regex101.com/library/mOsPHp
   final RegExp postcodeRegExp = new RegExp(
       r"^(A[BL]|B[ABDFHLNRSTX]?|C[ABFHMORTVW]|D[ADEGHLNTY]|E[CHNX]?|F[KY]|G[LUY]?|H[ADGPRSUX]|I[GMPV]|JE|K[ATWY]|L[ADELNSU]?|M[EKL]?|N[EGNPRW]?|O[LX]|P[AEHLOR]|R[GHM]|S[AEGKLMNOPRSTWY]?|T[ADFNQRSW]|UB|W[ACDFNRSV]?|YO|ZE)(\d[\dA-Z]?) ?(\d)([A-Z]{2})");
 
@@ -43,6 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _formatPostcode() {
     setState(() {
       _formattedPostcode = validatePostcode(_postcodeController.text);
+      // validatePostcode() returns either a formatted valid postcode or else null
       if (_formattedPostcode == null) {
         _formattedPostcode = '#error#';
       }
@@ -89,11 +92,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   validatePostcode(pc) {
+    // convert to upper case and then get the first regex match
     Match match = postcodeRegExp.firstMatch(pc.toUpperCase());
-    // print("Group count: ${match.groupCount}");
+    // the match will contain four groups for a properly formatted postcode
+    // which are displayed as G1G2 G3G4 (i.e. concatenated but with a space between the 3rd and 4th groups)
     if (match == null || match.groupCount != 4) {
+      // if we got no match or somehow not the right number of groups, return null
       return null;
     } else {
+      // format the groups properly
+      // (group 0 is the whole match)
       return "${match.group(1)}${match.group(2)} ${match.group(3)}${match.group(4)}";
     }
   }
